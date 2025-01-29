@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		326D85D02D4A9CBB00854641 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 326D85CF2D4A9CBB00854641 /* CoreData.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		325BC0072D490D1C00A4C7A9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		325BBFED2D490D1A00A4C7A9 /* TodoListApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoListApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		325BC0062D490D1C00A4C7A9 /* TodoListAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoListAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		325BC0102D490D1C00A4C7A9 /* TodoListAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoListAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		326D85CF2D4A9CBB00854641 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -65,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				326D85D02D4A9CBB00854641 /* CoreData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +97,7 @@
 				325BBFEF2D490D1A00A4C7A9 /* TodoListApp */,
 				325BC0092D490D1C00A4C7A9 /* TodoListAppTests */,
 				325BC0132D490D1C00A4C7A9 /* TodoListAppUITests */,
+				326D85CE2D4A9CBB00854641 /* Frameworks */,
 				325BBFEE2D490D1A00A4C7A9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -103,6 +110,14 @@
 				325BC0102D490D1C00A4C7A9 /* TodoListAppUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		326D85CE2D4A9CBB00854641 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				326D85CF2D4A9CBB00854641 /* CoreData.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
