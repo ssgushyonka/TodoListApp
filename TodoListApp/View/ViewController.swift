@@ -17,7 +17,9 @@ class ViewController: UIViewController {
         setupConstraints()
         
         fetchTodosFromCoreData()
-        loadTodosFromAPI()
+        if tasks.isEmpty {
+            loadTodosFromAPI()
+        }
     }
     
     private let tableView: UITableView = {
@@ -32,6 +34,8 @@ class ViewController: UIViewController {
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 44
     }
     
     func setupConstraints() {
@@ -40,7 +44,7 @@ class ViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     func loadTodosFromAPI() {
@@ -48,7 +52,9 @@ class ViewController: UIViewController {
             guard let self = self else { return }
             guard let todoItems = todoItems else { return }
             CoreDataStack.shared.saveTodoItemsToCoreData(todoItems)
-            self.fetchTodosFromCoreData()
+            if self.tasks.isEmpty {
+                self.fetchTodosFromCoreData()
+            }
         }
     }
     
@@ -56,6 +62,7 @@ class ViewController: UIViewController {
         CoreDataStack.shared.fetchTodosFromCoreData { [weak self] tasks in
             guard let self = self else { return }
             self.tasks = tasks
+            print("Loaded from core data:", tasks.map { "\($0.todo ?? "nil") - \($0.completed)" })
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
@@ -65,9 +72,9 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tasks.count
-    }
-    
+            return tasks.count
+        }
+        
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.Identifier, for: indexPath) as? TaskTableViewCell else {
             return UITableViewCell()
@@ -76,10 +83,25 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         cell.configure(with: task.todo ?? "", isCompleted: task.completed)
         
         cell.toggleCompletion = { [weak self] in
-            guard let self = self else { return }
-            self.tasks[indexPath.row].completed.toggle()
-            CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+        guard let self = self else { return }
+        let task = self.tasks[indexPath.row]
+        print("Before: \(task.todo ?? "nil") - \(task.completed)")
+        task.completed.toggle()
+        CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+        print("After save in Core Data: \(task.todo ?? "nil") - \(task.completed)")
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
         }
         return cell
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let task = tasks[indexPath.row]
+        let taskDetailVC = TaskDetailViewController()
+        taskDetailVC.taskText = task.todo
+        navigationController?.pushViewController(taskDetailVC, animated: true)
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
     }
 }
