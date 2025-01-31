@@ -5,10 +5,11 @@ class TaskTableViewCell: UITableViewCell {
     static let Identifier = "TaskTableViewCell"
     private let checkmarkButton = CheckmarkButton()
     private var isCompleted: Bool = false
+    var toggleCompletion: (() -> Void)?
+    var onDelete: (() -> Void)?
     
     private let taskLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .white
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
@@ -20,6 +21,9 @@ class TaskTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
         setupConstraints()
+        
+        let interaction = UIContextMenuInteraction(delegate: self)
+        self.addInteraction(interaction)
     }
     
     private func setupViews() {
@@ -43,8 +47,7 @@ class TaskTableViewCell: UITableViewCell {
         ])
     }
     
-    var toggleCompletion: (() -> Void)?
-    
+
     @objc private func didTapCheckmark() {
         toggleCompletion?()
     }
@@ -66,5 +69,22 @@ class TaskTableViewCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// for task preview
+extension TaskTableViewCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: {
+            let previewVC = TaskDetailViewController()
+            previewVC.taskText = self.taskLabel.text
+            previewVC.preferredContentSize = CGSize(width: 300, height: 300)
+            return previewVC
+        }, actionProvider: { _ in
+            let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), handler: { _ in
+                self.onDelete?()
+            })
+            return UIMenu(title: "", children: [deleteAction])
+        })
     }
 }
