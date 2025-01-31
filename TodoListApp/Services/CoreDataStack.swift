@@ -66,9 +66,9 @@ class CoreDataStack {
     }
     func fetchTodosFromCoreData(completion: @escaping ([TodoItem]) -> Void) {
         let context = CoreDataStack.shared.viewContext
+        let fetchRequest: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
         context.perform {
-            let fetchRequest: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
             
             do {
                 let todos = try context.fetch(fetchRequest)
