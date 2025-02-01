@@ -7,6 +7,7 @@ class TaskTableViewCell: UITableViewCell {
     private var isCompleted: Bool = false
     var toggleCompletion: (() -> Void)?
     var onDelete: (() -> Void)?
+    var isContextMenuEnabled: Bool = false
     
     private let taskLabel: UILabel = {
         let label = UILabel()
@@ -21,9 +22,9 @@ class TaskTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
         setupConstraints()
-        
+        isContextMenuEnabled = true
         let interaction = UIContextMenuInteraction(delegate: self)
-        self.addInteraction(interaction)
+        contentView.addInteraction(interaction)
     }
     
     private func setupViews() {
@@ -47,11 +48,9 @@ class TaskTableViewCell: UITableViewCell {
         ])
     }
     
-
     @objc private func didTapCheckmark() {
         toggleCompletion?()
     }
-    
     func configure(with text: String, isCompleted: Bool) {
         self.isCompleted = isCompleted
         let attributes: [NSAttributedString.Key: Any] = isCompleted ? [
@@ -59,7 +58,6 @@ class TaskTableViewCell: UITableViewCell {
             .foregroundColor: UIColor.lightGray,
             .font: UIFont.systemFont(ofSize: 16)
         ] : [
-            .foregroundColor: UIColor.white,
             .font: UIFont.systemFont(ofSize: 16)
         ]
         taskLabel.attributedText = NSAttributedString(string: text, attributes: attributes)

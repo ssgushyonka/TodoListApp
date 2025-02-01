@@ -15,31 +15,24 @@ class TaskDetailViewController: UIViewController {
         
         return textView
     }()
-
-    
-    private let contentView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
     var onSave: ((String) -> Void)?
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
         setupViews()
         setupConstraints()
+        view.backgroundColor = .black
+        
         taskTextView.text = taskText
         taskTextView.isEditable = true
         taskTextView.becomeFirstResponder()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(saveButtonTapped))
     }
-    
-    
+
     //MARK: - set up views and constraints
     
     private func setupViews() {
+        
         view.addSubview(taskTextView)
     }
     private func setupConstraints() {
@@ -59,7 +52,6 @@ class TaskDetailViewController: UIViewController {
             CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
         }
         onSave?(updatedText)
-        taskTextView.resignFirstResponder()
         navigationController?.popViewController(animated: true)
     }
 }

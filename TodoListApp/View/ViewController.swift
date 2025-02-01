@@ -9,18 +9,11 @@ class ViewController: UIViewController {
     }
     private var tasks: [TodoItem] = []
     private var filteredTasks: [TodoItem] = []
-    
-    private let toolbar: UIToolbar = {
-           let toolbar = UIToolbar()
-           toolbar.translatesAutoresizingMaskIntoConstraints = false
-           return toolbar
-       }()
-    
+    var taskCountLabel: UILabel?
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.Identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        
         return tableView
     }()
     
@@ -42,7 +35,6 @@ class ViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search"
         definesPresentationContext = true
-        
         setupViews()
         setupConstraints()
         fetchTodosFromCoreData()
@@ -50,34 +42,35 @@ class ViewController: UIViewController {
             loadTodosFromAPI()
         }
     }
-    func setupToolbar() {
-        let editButton = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), style: .plain, target: self, action: #selector(editButtonTapped))
-        editButton.tintColor = UIColor(red: 0xFE / 255, green: 0xD7 / 255, blue: 0x02 / 255, alpha: 1)
-        let buttonSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+    func setupNavigationBarBottomItems() {
         let taskCountLabel = UILabel()
-        let taskCountItem = UIBarButtonItem(customView: taskCountLabel)
-        taskCountLabel.text = "\(tasks.count) задач"
-        taskCountLabel.font = UIFont.systemFont(ofSize: 11)
-        taskCountLabel.numberOfLines = 0
-        taskCountLabel.lineBreakMode = .byWordWrapping
-        taskCountLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 200).isActive = true
-        toolbar.items = [buttonSpace, taskCountItem, buttonSpace, editButton]
+        taskCountLabel.textAlignment = .center
+        taskCountLabel.font = UIFont.systemFont(ofSize: 14)
+        self.taskCountLabel = taskCountLabel
         
-        updateTaskCount()
+        let editButton = UIBarButtonItem(
+            image: UIImage(systemName: "square.and.pencil"),
+            style: .plain,
+            target: self,
+            action: #selector(editButtonTapped)
+        )
+        editButton.tintColor = UIColor(red: 0xFE/255, green: 0xD7/255, blue: 0x02/255, alpha: 1)
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolbarItems = [ flexibleSpace, UIBarButtonItem(customView: taskCountLabel), flexibleSpace, editButton]
+        navigationController?.toolbar.barTintColor = UIColor( red: 0x27/255.0, green: 0x27/255.0, blue: 0x29/255.0, alpha: 1.0)
+        navigationController?.isToolbarHidden = false
     }
+
     func updateTaskCount() {
-        guard let toolbarItems = toolbar.items,
-              let taskCountItem = toolbarItems.first(where: { $0.customView is UILabel }),
-              let taskCountLabel = taskCountItem.customView as? UILabel else {
-            return
-        }
-        taskCountLabel.text = "\(tasks.count) задач"
+        guard let taskCountLabel = self.taskCountLabel else { return }
+        taskCountLabel.text = "\(tasks.count) Задач"
+        taskCountLabel.sizeToFit()
     }
-    
+
     @objc func editButtonTapped() {
-        let alertController = UIAlertController(title: "Новая задача", message: "Введите описание задачи", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Новая задача", message: "Введите задачу", preferredStyle: .alert)
         alertController.addTextField { textField in
-            textField.placeholder = "Описание задачи"
+            textField.placeholder = "Задача"
         }
         
         let addAction = UIAlertAction(title: "Добавить", style: .default) { [weak self] _ in
@@ -97,32 +90,30 @@ class ViewController: UIViewController {
         let userId = 1
         let viewModel = TodoViewModel()
         viewModel.addItem(id: Int(newTaskId), todo: todo, completed: false, userId: userId)
-        fetchTodosFromCoreData()
-        tableView.reloadData()
-        updateTaskCount()
+        CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+        DispatchQueue.main.async{
+            self.fetchTodosFromCoreData()
+            self.tableView.reloadData()
+            self.updateTaskCount()
+        }
     }
     //MARK: - Set up UI and constraints
     
     func setupViews() {
         view.addSubview(tableView)
-        view.addSubview(toolbar)
-        setupToolbar()
+        setupNavigationBarBottomItems()
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 44
     }
     
     func setupConstraints() {
+
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: toolbar.topAnchor),
-            
-            toolbar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            toolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
     
@@ -143,9 +134,10 @@ class ViewController: UIViewController {
     func fetchTodosFromCoreData() {
         CoreDataStack.shared.fetchTodosFromCoreData { [weak self] tasks in
             guard let self = self else { return }
-            self.tasks = tasks
-            print("Loaded from core data:", tasks.map { "\($0.todo ?? "nil") - \($0.completed)" })
+            
             DispatchQueue.main.async {
+                self.tasks = tasks
+                print("Loaded from core data:", tasks.map { "\($0.todo ?? "nil") - \($0.completed)" })
                 self.tableView.reloadData()
                 self.updateTaskCount()
             }
@@ -158,7 +150,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return isFiltering ? filteredTasks.count : tasks.count
     }
-        
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.Identifier, for: indexPath) as? TaskTableViewCell else {
             return UITableViewCell()
@@ -179,22 +171,21 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             } else {
                 tasks[indexInTasks] = task
             }
-            
             tableView.reloadRows(at: [indexPath], with: .automatic)
         }
         
         cell.onDelete = { [weak self] in
             guard let self = self else { return }
             
-            let indexInTasks = self.tasks.firstIndex(where: { $0.objectID == task.objectID }) ?? indexPath.row
-            
-            if isFiltering {
-                filteredTasks.remove(at: indexPath.row)
+            if let indexInTasks = self.tasks.firstIndex(where: { $0.objectID == task.objectID }) {
+                self.tasks.remove(at: indexInTasks)
+                CoreDataStack.shared.viewContext.delete(task)
+                CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
             }
-            tasks.remove(at: indexInTasks)
             
-            CoreDataStack.shared.viewContext.delete(task)
-            CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+            if self.isFiltering {
+                self.filteredTasks.remove(at: indexPath.row)
+            }
             
             tableView.deleteRows(at: [indexPath], with: .automatic)
             self.updateTaskCount()
@@ -206,13 +197,14 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     // for task detail VC
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
         let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
         let taskDetailVC = TaskDetailViewController()
         taskDetailVC.taskText = task.todo
         taskDetailVC.task = task
+        
         taskDetailVC.onSave = { [weak self] updatedText in
             guard let self = self else { return }
-        
             task.todo = updatedText
             CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
             if isFiltering {
@@ -229,12 +221,17 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        guard let searchText = searchController.searchBar.text, !searchText.isEmpty else {
-            filteredTasks = tasks
+        guard let searchText = searchController.searchBar.text else {
+            filteredTasks.removeAll()
             tableView.reloadData()
             return
         }
-        filteredTasks = tasks.filter { $0.todo?.localizedCaseInsensitiveContains(searchText) ?? false }
+        
+        if searchText.isEmpty {
+            filteredTasks.removeAll()
+        } else {
+            filteredTasks = tasks.filter { $0.todo?.localizedCaseInsensitiveContains(searchText) ?? false }
+        }
         tableView.reloadData()
     }
 }
