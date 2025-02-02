@@ -6,6 +6,8 @@ class TaskTableViewCell: UITableViewCell {
     private let checkmarkButton = CheckmarkButton()
     private var isCompleted: Bool = false
     var toggleCompletion: (() -> Void)?
+    var onEdit: (() -> Void)?
+    var onShare: (() -> Void)?
     var onDelete: (() -> Void)?
     var isContextMenuEnabled: Bool = false
     
@@ -74,6 +76,7 @@ class TaskTableViewCell: UITableViewCell {
 
 // for task preview
 extension TaskTableViewCell: UIContextMenuInteractionDelegate {
+    
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: {
             let previewVC = TaskDetailViewController()
@@ -81,10 +84,17 @@ extension TaskTableViewCell: UIContextMenuInteractionDelegate {
             previewVC.preferredContentSize = CGSize(width: 300, height: 300)
             return previewVC
         }, actionProvider: { _ in
+            
             let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), handler: { _ in
                 self.onDelete?()
             })
-            return UIMenu(title: "", children: [deleteAction])
+            let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "square.and.pencil"), handler: { _ in
+                self.onEdit?()
+            })
+            let shareAction = UIAction(title: "Поделиться", image: UIImage(systemName: "square.and.arrow.up"), handler: { _ in
+                self.onShare?()
+            })
+            return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
         })
     }
 }

@@ -29,6 +29,8 @@ class ViewController: UIViewController {
         backButton.title = "Назад"
         navigationItem.backBarButtonItem = backButton
         navigationController?.isToolbarHidden = false
+        
+        // Setup searchController and mic button
         navigationItem.searchController = searchController
         if let microphoneImage = UIImage(systemName: "mic.fill") {
             searchController.searchBar.showsBookmarkButton = true
@@ -61,9 +63,10 @@ class ViewController: UIViewController {
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         toolbarItems = [ flexibleSpace, UIBarButtonItem(customView: taskCountLabel), flexibleSpace, editButton]
         navigationController?.toolbar.barTintColor = UIColor( red: 0x27/255.0, green: 0x27/255.0, blue: 0x29/255.0, alpha: 1.0)
+        navigationController?.toolbar.isTranslucent = false
         navigationController?.isToolbarHidden = false
     }
-
+    // Func for update tasks count in Navigation bar label
     func updateTaskCount() {
         guard let taskCountLabel = self.taskCountLabel else { return }
         taskCountLabel.text = "\(tasks.count) Задач"
@@ -101,7 +104,6 @@ class ViewController: UIViewController {
         }
     }
     //MARK: - Set up UI and constraints
-    
     func setupViews() {
         view.addSubview(tableView)
         setupNavigationBarBottomItems()
@@ -111,7 +113,6 @@ class ViewController: UIViewController {
     }
     
     func setupConstraints() {
-
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -137,7 +138,6 @@ class ViewController: UIViewController {
     func fetchTodosFromCoreData() {
         CoreDataStack.shared.fetchTodosFromCoreData { [weak self] tasks in
             guard let self = self else { return }
-            
             DispatchQueue.main.async {
                 self.tasks = tasks
                 print("Loaded from core data:", tasks.map { "\($0.todo ?? "nil") - \($0.completed)" })
@@ -146,6 +146,30 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    //Task button func in contentView for tableViewCell
+    private func editTask(at indexPath: IndexPath) {
+        let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
+        let taskDetailVC = TaskDetailViewController()
+        taskDetailVC.taskText = task.todo
+        taskDetailVC.task = task
+        
+        taskDetailVC.onSave = { [weak self] updatedText in
+            guard let self = self else { return }
+            task.todo = updatedText
+            CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+            
+            if self.isFiltering {
+                self.filteredTasks[indexPath.row] = task
+            } else {
+                self.tasks[indexPath.row] = task
+            }
+            self.tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        
+        navigationController?.pushViewController(taskDetailVC, animated: true)
+    }
+    
 }
 //MARK: - VC extensions
 
@@ -193,11 +217,16 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.deleteRows(at: [indexPath], with: .automatic)
             self.updateTaskCount()
         }
+        // edit button in content menu
+        cell.onEdit = {[weak self] in
+            guard let self = self else {return}
+            self.editTask(at: indexPath)
+        }
         
         return cell
     }
     
-    // for task detail VC
+    // pushing taskDetailVC
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -229,7 +258,6 @@ extension ViewController: UISearchResultsUpdating {
             tableView.reloadData()
             return
         }
-        
         if searchText.isEmpty {
             filteredTasks.removeAll()
         } else {
