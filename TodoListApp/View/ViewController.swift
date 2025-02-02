@@ -12,8 +12,8 @@ class ViewController: UIViewController {
     var taskCountLabel: UILabel?
     private let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.Identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.Identifier)
         return tableView
     }()
     
@@ -30,7 +30,10 @@ class ViewController: UIViewController {
         navigationItem.backBarButtonItem = backButton
         navigationController?.isToolbarHidden = false
         navigationItem.searchController = searchController
-        
+        if let microphoneImage = UIImage(systemName: "mic.fill") {
+            searchController.searchBar.showsBookmarkButton = true
+            searchController.searchBar.setImage(microphoneImage, for: .bookmark, state: .normal)
+        }
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search"

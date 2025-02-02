@@ -35,6 +35,7 @@ class TaskTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
+        contentView.preservesSuperviewLayoutMargins = true
         NSLayoutConstraint.activate([
             checkmarkButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             checkmarkButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -43,9 +44,10 @@ class TaskTableViewCell: UITableViewCell {
             
             taskLabel.leadingAnchor.constraint(equalTo: checkmarkButton.trailingAnchor, constant: 16),
             taskLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            taskLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            taskLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
         ])
+        taskLabel.setContentCompressionResistancePriority(.required, for: .vertical)
     }
     
     @objc private func didTapCheckmark() {
