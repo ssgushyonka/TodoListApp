@@ -8,6 +8,11 @@ class CoreDataStack {
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TodoListApp")
+        
+        let description = container.persistentStoreDescriptions.first
+        description?.shouldMigrateStoreAutomatically = true
+        description?.shouldInferMappingModelAutomatically = true
+        
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("Unresolved error \(error), \(error.localizedDescription)")
@@ -57,6 +62,8 @@ class CoreDataStack {
                     newItem.todo = todoItem.todo
                     newItem.completed = todoItem.completed
                     newItem.userId = Int64(todoItem.userId)
+                    newItem.createdAt = todoItem.createdAt
+                    newItem.desc = todoItem.desc ?? ""
                 }
                 if context.hasChanges {
                     CoreDataStack.shared.saveContext(context: context)
@@ -71,7 +78,13 @@ class CoreDataStack {
         context.perform {
             
             do {
-                let todos = try context.fetch(fetchRequest)
+                var todos = try context.fetch(fetchRequest)
+                todos = todos.map { todo in
+                    if todo.createdAt == nil {
+                        todo.createdAt = Date()
+                    }
+                    return todo
+                }
                 DispatchQueue.main.async {
                     completion(todos)
                 }

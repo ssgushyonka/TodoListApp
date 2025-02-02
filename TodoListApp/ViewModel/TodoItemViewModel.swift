@@ -28,6 +28,8 @@ class TodoViewModel {
         todoItem.todo = todo
         todoItem.completed = completed
         todoItem.userId = Int64(userId)
+        todoItem.createdAt = Date()
+        todoItem.desc = String()
         try? context.save()
     }
 

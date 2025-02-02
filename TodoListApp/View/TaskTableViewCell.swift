@@ -20,6 +20,24 @@ class TaskTableViewCell: UITableViewCell {
         return label
     }()
     
+    private let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let descLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
@@ -28,11 +46,14 @@ class TaskTableViewCell: UITableViewCell {
         let interaction = UIContextMenuInteraction(delegate: self)
         contentView.addInteraction(interaction)
     }
+    //MARK: - Setup views and constraints
     
     private func setupViews() {
         checkmarkButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(checkmarkButton)
         contentView.addSubview(taskLabel)
+        contentView.addSubview(descLabel)
+        contentView.addSubview(dateLabel)
         checkmarkButton.addTarget(self, action: #selector(didTapCheckmark), for: .touchUpInside)
     }
     
@@ -44,18 +65,29 @@ class TaskTableViewCell: UITableViewCell {
             checkmarkButton.widthAnchor.constraint(equalToConstant: 24),
             checkmarkButton.heightAnchor.constraint(equalToConstant: 24),
             
+            taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
             taskLabel.leadingAnchor.constraint(equalTo: checkmarkButton.trailingAnchor, constant: 16),
             taskLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            taskLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+            
+            descLabel.topAnchor.constraint(equalTo: taskLabel.bottomAnchor, constant: 8),
+            descLabel.leadingAnchor.constraint(equalTo: taskLabel.leadingAnchor),
+            descLabel.trailingAnchor.constraint(equalTo: taskLabel.trailingAnchor),
+            
+            dateLabel.topAnchor.constraint(equalTo: descLabel.isHidden ? taskLabel.bottomAnchor : descLabel.bottomAnchor, constant: 4),
+            dateLabel.leadingAnchor.constraint(equalTo: taskLabel.leadingAnchor),
+            dateLabel.trailingAnchor.constraint(equalTo: taskLabel.trailingAnchor),
+            dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
         ])
         taskLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        descLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        dateLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        descLabel.setContentHuggingPriority(.defaultLow, for: .vertical)
     }
     
     @objc private func didTapCheckmark() {
         toggleCompletion?()
     }
-    func configure(with text: String, isCompleted: Bool) {
+    func configure(with text: String, isCompleted: Bool, createdAt: Date, desc: String) {
         self.isCompleted = isCompleted
         let attributes: [NSAttributedString.Key: Any] = isCompleted ? [
             .strikethroughStyle: NSUnderlineStyle.thick.rawValue,
@@ -65,8 +97,20 @@ class TaskTableViewCell: UITableViewCell {
             .font: UIFont.systemFont(ofSize: 16)
         ]
         taskLabel.attributedText = NSAttributedString(string: text, attributes: attributes)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yy"
+        
+        dateLabel.text = "\(dateFormatter.string(from: createdAt))"
+        descLabel.text = desc
+        if desc.isEmpty {
+                descLabel.isHidden = true
+        } else {
+            descLabel.isHidden = false
+        }
         checkmarkButton.setAppearance(isDone: isCompleted)
+        
         setNeedsLayout()
+        layoutIfNeeded()
     }
     
     required init?(coder: NSCoder) {
