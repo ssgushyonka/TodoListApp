@@ -19,7 +19,6 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateTaskCount()
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.tintColor = UIColor(red: 0xFE / 255, green: 0xD7 / 255, blue: 0x02 / 255, alpha: 1)
@@ -42,6 +41,7 @@ class ViewController: UIViewController {
         definesPresentationContext = true
         setupViews()
         setupConstraints()
+        updateTaskCount()
         fetchTodosFromCoreData()
         if tasks.isEmpty {
             loadTodosFromAPI()
@@ -130,6 +130,7 @@ class ViewController: UIViewController {
             CoreDataStack.shared.saveTodoItemsToCoreData(todoItems)
             if self.tasks.isEmpty {
                 self.fetchTodosFromCoreData()
+                self.tableView.reloadData()
                 self.updateTaskCount()
             }
         }
@@ -187,8 +188,6 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let createdAt = task.createdAt ?? Date()
         
         cell.configure(with: task.todo ?? "", isCompleted: task.completed, createdAt: createdAt, desc: task.desc ?? "")
-        cell.configure(with: task.todo ?? "", isCompleted: task.completed, createdAt: createdAt, desc: task.desc ?? "")
-        
         cell.toggleCompletion = { [weak self] in
             guard let self = self else { return }
             let indexInTasks = self.tasks.firstIndex(where: { $0.objectID == task.objectID }) ?? indexPath.row
@@ -210,6 +209,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             if let indexInTasks = self.tasks.firstIndex(where: { $0.objectID == task.objectID }) {
                 self.tasks.remove(at: indexInTasks)
                 CoreDataStack.shared.viewContext.delete(task)
+                print("Task is deleted")
                 CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
             }
             
