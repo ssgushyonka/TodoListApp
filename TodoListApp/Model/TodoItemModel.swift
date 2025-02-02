@@ -6,6 +6,8 @@ struct TodoItemModel: Codable {
     let todo: String
     let completed: Bool
     let userId: Int
+    let createdAt: Date?
+    let desc: String?
 }
 
 struct TodoItemModelResponse: Codable {
@@ -19,10 +21,13 @@ extension TodoItemModel {
         todoItem.todo = self.todo
         todoItem.completed = self.completed
         todoItem.userId = Int64(self.userId)
+        todoItem.createdAt = self.createdAt ?? Date()
+        todoItem.desc = self.desc ?? ""
+        
         return todoItem
     }
     
     static func fromCoreDataModel(_ coreDataModel: TodoItem) -> TodoItemModel {
-        return TodoItemModel(id: Int(coreDataModel.id), todo: coreDataModel.todo ?? "", completed: coreDataModel.completed, userId: Int(coreDataModel.userId))
+        return TodoItemModel(id: Int(coreDataModel.id), todo: coreDataModel.todo ?? "", completed: coreDataModel.completed, userId: Int(coreDataModel.userId), createdAt: coreDataModel.createdAt ?? Date(), desc: coreDataModel.desc ?? "")
     }
 }

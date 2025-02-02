@@ -2,7 +2,7 @@
 //  TodoItem+CoreDataProperties.swift
 //  TodoListApp
 //
-//  Created by Элина Борисова on 28.01.2025.
+//  Created by Элина Борисова on 02.02.2025.
 //
 //
 
@@ -16,10 +16,12 @@ extension TodoItem {
         return NSFetchRequest<TodoItem>(entityName: "TodoItem")
     }
 
+    @NSManaged public var completed: Bool
+    @NSManaged public var createdAt: Date?
     @NSManaged public var id: Int64
     @NSManaged public var todo: String?
-    @NSManaged public var completed: Bool
     @NSManaged public var userId: Int64
+    @NSManaged public var desc: String?
 
 }
 
