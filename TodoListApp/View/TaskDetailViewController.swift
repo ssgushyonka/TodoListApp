@@ -9,7 +9,7 @@ class TaskDetailViewController: UIViewController {
 
     private let taskTextView: UITextView = {
         let textView = UITextView()
-        textView.font = UIFont.boldSystemFont(ofSize: 34)
+        textView.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         textView.backgroundColor = .black
         textView.textColor = .white
         textView.isEditable = true
@@ -53,8 +53,8 @@ class TaskDetailViewController: UIViewController {
             dateLabel.text = ""
         }
         descTextView.text = task?.desc
-        
         taskTextView.becomeFirstResponder()
+        taskTextView.inputView = UIView()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(saveButtonTapped))
         taskTextView.sizeToFit()
         setupViews()
@@ -74,7 +74,8 @@ class TaskDetailViewController: UIViewController {
             taskTextView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             taskTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             taskTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            taskTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
+            //taskTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
+            //taskTextView.heightAnchor.constraint(lessThanOrEqualToConstant: 150),
             
             dateLabel.topAnchor.constraint(equalTo: taskTextView.bottomAnchor, constant: 5),
             dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
