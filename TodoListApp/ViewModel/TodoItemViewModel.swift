@@ -6,6 +6,30 @@ class TodoViewModel {
     var tasks: [TodoItem] = []
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
+    func loadInitialDataIfNeeded(completion: @escaping () -> Void) {
+        if UserDefaults.standard.bool(forKey: "DataLoaded") {
+            fetchTodosFromCoreData { [weak self] todos in
+                guard let self = self else { return }
+                self.tasks = todos
+                completion()
+            }
+        } else {
+            fetchTodosFromAPI { [weak self] todoItems in
+                guard let self = self, let todoItems = todoItems else {
+                    print("API error")
+                    completion()
+                    return
+                }
+                self.saveTodoItemsToCoreData(todoItems)
+                UserDefaults.standard.set(true, forKey: "DataLoaded")
+                self.fetchTodosFromCoreData { todos in
+                    self.tasks = todos
+                    completion()
+                }
+            }
+        }
+    }
+    
     func fetchTodosFromAPI(completion: @escaping ([TodoItemModel]?) -> Void) {
         let apiService = APIService()
         apiService.fetchTodoItems { todoItems in

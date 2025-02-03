@@ -1,9 +1,17 @@
 import Foundation
+import CoreData
 import UIKit
 
 class ViewController: UIViewController {
+    // For loading view
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let loadingLabel = UILabel()
+
+    
+    let viewModel = TodoViewModel()
     
     let searchController = UISearchController(searchResultsController: nil)
+    
     private var isFiltering: Bool {
         return searchController.isActive && !(searchController.searchBar.text?.isEmpty ?? true)
     }
@@ -30,6 +38,7 @@ class ViewController: UIViewController {
         navigationController?.isToolbarHidden = false
         
         // Setup searchController and mic button
+        
         navigationItem.searchController = searchController
         if let microphoneImage = UIImage(systemName: "mic.fill") {
             searchController.searchBar.showsBookmarkButton = true
@@ -42,6 +51,19 @@ class ViewController: UIViewController {
         setupViews()
         setupConstraints()
         updateTaskCount()
+        
+        
+        setupLoadingIndicator()
+        activityIndicator.startAnimating()
+        loadingLabel.isHidden = false
+        viewModel.loadInitialDataIfNeeded { [weak self] in
+            guard let self = self else { return }
+            self.activityIndicator.stopAnimating()
+            self.loadingLabel.isHidden = true
+            self.tableView.reloadData()
+            self.updateTaskCount()
+        }
+        
         fetchTodosFromCoreData()
         if tasks.isEmpty {
             loadTodosFromAPI()
@@ -66,11 +88,14 @@ class ViewController: UIViewController {
         navigationController?.toolbar.isTranslucent = false
         navigationController?.isToolbarHidden = false
     }
+    
     // Func for update tasks count in Navigation bar label
     func updateTaskCount() {
         guard let taskCountLabel = self.taskCountLabel else { return }
-        taskCountLabel.text = "\(tasks.count) Задач"
-        taskCountLabel.sizeToFit()
+        DispatchQueue.main.async {
+            taskCountLabel.text = "\(self.tasks.count) Задач"
+            taskCountLabel.sizeToFit()
+        }
     }
 
     @objc func editButtonTapped() {
@@ -122,20 +147,20 @@ class ViewController: UIViewController {
     }
     
     //MARK: - load data from api and fetch from coredata
-    
     func loadTodosFromAPI() {
         APIService().fetchTodoItems { [weak self] todoItems in
             guard let self = self else { return }
             guard let todoItems = todoItems else { return }
             CoreDataStack.shared.saveTodoItemsToCoreData(todoItems)
             if self.tasks.isEmpty {
-                self.fetchTodosFromCoreData()
-                self.tableView.reloadData()
-                self.updateTaskCount()
+                DispatchQueue.main.async {
+                    self.fetchTodosFromCoreData()
+                    self.tableView.reloadData()
+                    self.updateTaskCount()
+                }
             }
         }
     }
-    
     func fetchTodosFromCoreData() {
         CoreDataStack.shared.fetchTodosFromCoreData { [weak self] tasks in
             guard let self = self else { return }
@@ -147,7 +172,6 @@ class ViewController: UIViewController {
             }
         }
     }
-    
     //Task button func in contentView for tableViewCell
     private func editTask(at indexPath: IndexPath) {
         let task = isFiltering ? filteredTasks[indexPath.row] : tasks[indexPath.row]
@@ -267,5 +291,21 @@ extension ViewController: UISearchResultsUpdating {
             filteredTasks = tasks.filter { $0.todo?.localizedCaseInsensitiveContains(searchText) ?? false }
         }
         tableView.reloadData()
+    }
+}
+
+// Loading indicator set up
+extension ViewController {
+    private func setupLoadingIndicator() {
+        activityIndicator.color = .gray
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        loadingLabel.text = "Загрузка..."
+        loadingLabel.textAlignment = .center
+        loadingLabel.textColor = .gray
+        loadingLabel.frame = CGRect(x: 0, y: activityIndicator.frame.maxY + 8, width: view.bounds.width, height: 30)
+        
+        view.addSubview(activityIndicator)
+        view.addSubview(loadingLabel)
     }
 }

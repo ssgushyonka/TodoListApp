@@ -74,8 +74,6 @@ class TaskDetailViewController: UIViewController {
             taskTextView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             taskTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             taskTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            //taskTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
-            //taskTextView.heightAnchor.constraint(lessThanOrEqualToConstant: 150),
             
             dateLabel.topAnchor.constraint(equalTo: taskTextView.bottomAnchor, constant: 5),
             dateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
