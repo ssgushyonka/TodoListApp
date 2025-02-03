@@ -20,9 +20,11 @@ class CoreDataStack {
         }
         return container
     }()
+    
     var viewContext: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
+    
     var backgroundContext: NSManagedObjectContext {
         let context = persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
@@ -33,7 +35,6 @@ class CoreDataStack {
         if context.hasChanges {
             do {
                 try context.save()
-                
             } catch {
                 print("Save error: \(error)")
             }
@@ -47,7 +48,7 @@ class CoreDataStack {
             let count = try context.count(for: fetchRequest)
             return count > 0
         } catch {
-            print("Task existance error: \(error)")
+            print("Task existence error: \(error)")
             return false
         }
     }
@@ -65,9 +66,9 @@ class CoreDataStack {
                     newItem.createdAt = todoItem.createdAt
                     newItem.desc = todoItem.desc ?? ""
                 }
-                if context.hasChanges {
-                    CoreDataStack.shared.saveContext(context: context)
-                }
+            }
+            if context.hasChanges {
+                CoreDataStack.shared.saveContext(context: context)
             }
         }
     }
@@ -76,7 +77,6 @@ class CoreDataStack {
         let fetchRequest: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
         context.perform {
-            
             do {
                 var todos = try context.fetch(fetchRequest)
                 todos = todos.map { todo in
