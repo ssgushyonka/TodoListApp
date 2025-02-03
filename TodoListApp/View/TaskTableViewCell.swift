@@ -30,7 +30,7 @@ class TaskTableViewCell: UITableViewCell {
     
     private let descLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.font = .systemFont(ofSize: 13, weight: .medium)
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
