@@ -10,37 +10,49 @@ class TodoViewModel {
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var onTaskUpdated: (() -> Void)?
     var searchText: String = ""
-        
+    
     var isFiltering: Bool {
         return !searchText.isEmpty
     }
     func loadInitialDataIfNeeded(completion: @escaping () -> Void) {
-        if UserDefaults.standard.bool(forKey: "DataLoaded") {
-            fetchTodosFromCoreData { [weak self] todos in
-                guard let self = self else { return }
-                self.tasks = todos
-                DispatchQueue.main.async {
-                    completion()
-                    self.onTaskUpdated?()
-                }
-            }
-        } else {
-            fetchTodosFromAPI { [weak self] todoItems in
-                guard let self = self, let todoItems = todoItems else {
-                    print("API error")
-                    DispatchQueue.main.async {
-                        completion()
+        fetchTodosFromCoreData { [weak self] todos in
+            guard let self = self else { return }
+            
+            if todos.isEmpty {
+                print("load from api")
+                self.fetchTodosFromAPI { todoItems in
+                    guard let todoItems = todoItems else {
+                        print("error")
+                        DispatchQueue.main.async {
+                            completion()
+                        }
+                        return
                     }
-                    return
-                }
-                self.saveTodoItemsToCoreData(todoItems)
-                UserDefaults.standard.set(true, forKey: "DataLoaded")
-                self.fetchTodosFromCoreData { todos in
-                    self.tasks = todos
+                    self.tasks = todoItems.map { todo in
+                        let task = TodoItem(context: self.context)
+                        task.id = Int64(todo.id)
+                        task.todo = todo.todo
+                        task.completed = todo.completed
+                        task.userId = Int64(todo.userId)
+                        task.createdAt = Date()
+                        return task
+                    }
                     DispatchQueue.main.async {
-                        completion()
                         self.onTaskUpdated?()
                     }
+                    self.saveTodoItemsToCoreData(todoItems)
+                    UserDefaults.standard.set(true, forKey: "DataLoaded")
+                    
+                    DispatchQueue.main.async {
+                        completion()
+                    }
+                }
+            } else {
+                print("load from core data")
+                self.tasks = todos
+                DispatchQueue.main.async {
+                    self.onTaskUpdated?()
+                    completion()
                 }
             }
         }
@@ -49,8 +61,13 @@ class TodoViewModel {
     func fetchTodosFromAPI(completion: @escaping ([TodoItemModel]?) -> Void) {
         let apiService = APIService()
         apiService.fetchTodoItems { todoItems in
-            print("данные апи: \(todoItems?.count ?? 0)")
-            completion(todoItems)
+            if let todoItems = todoItems {
+                completion(todoItems)
+                print("данные апи: \(todoItems.count)")
+            } else {
+                print("Ошибка загрузки данных")
+                completion(nil)
+            }
         }
     }
     

@@ -34,11 +34,9 @@ class ViewController: UIViewController {
         activityIndicator.startAnimating()
         loadingLabel.isHidden = false
         viewModel.loadInitialDataIfNeeded { [weak self] in
-            DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                self?.loadingLabel.isHidden = true
-                self?.tableView.reloadData()
-            }
+            self?.activityIndicator.stopAnimating()
+            self?.loadingLabel.isHidden = true
+            self?.tableView.reloadData()
         }
     }
 
