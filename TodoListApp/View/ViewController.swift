@@ -31,10 +31,14 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupBindings()
+        activityIndicator.startAnimating()
+        loadingLabel.isHidden = false
         viewModel.loadInitialDataIfNeeded { [weak self] in
-            self?.activityIndicator.stopAnimating()
-            self?.loadingLabel.isHidden = true
-            self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.activityIndicator.stopAnimating()
+                self?.loadingLabel.isHidden = true
+                self?.tableView.reloadData()
+            }
         }
     }
 
@@ -63,14 +67,18 @@ class ViewController: UIViewController {
         setupViews()
         setupConstraints()
         setupLoadingIndicator()
+        /*
         activityIndicator.startAnimating()
         loadingLabel.isHidden = false
+         */
     }
 
     private func setupBindings() {
         viewModel.onTaskUpdated = { [weak self] in
-            self?.tableView.reloadData()
-            self?.updateTaskCount()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+                self?.updateTaskCount()
+            }
         }
     }
 
@@ -113,8 +121,8 @@ class ViewController: UIViewController {
 
     private func updateTaskCount() {
         guard let taskCountLabel = self.taskCountLabel else { return }
-        taskCountLabel.text = "\(viewModel.taskCount()) Задач"
-        taskCountLabel.sizeToFit()
+            taskCountLabel.text = "\(viewModel.taskCount()) Задач"
+            taskCountLabel.sizeToFit()
     }
 
     @objc private func editButtonTapped() {

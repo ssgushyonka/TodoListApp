@@ -19,22 +19,28 @@ class TodoViewModel {
             fetchTodosFromCoreData { [weak self] todos in
                 guard let self = self else { return }
                 self.tasks = todos
-                completion()
-                self.onTaskUpdated?()
+                DispatchQueue.main.async {
+                    completion()
+                    self.onTaskUpdated?()
+                }
             }
         } else {
             fetchTodosFromAPI { [weak self] todoItems in
                 guard let self = self, let todoItems = todoItems else {
                     print("API error")
-                    completion()
+                    DispatchQueue.main.async {
+                        completion()
+                    }
                     return
                 }
                 self.saveTodoItemsToCoreData(todoItems)
                 UserDefaults.standard.set(true, forKey: "DataLoaded")
                 self.fetchTodosFromCoreData { todos in
                     self.tasks = todos
-                    completion()
-                    self.onTaskUpdated?()
+                    DispatchQueue.main.async {
+                        completion()
+                        self.onTaskUpdated?()
+                    }
                 }
             }
         }
@@ -43,6 +49,7 @@ class TodoViewModel {
     func fetchTodosFromAPI(completion: @escaping ([TodoItemModel]?) -> Void) {
         let apiService = APIService()
         apiService.fetchTodoItems { todoItems in
+            print("данные апи: \(todoItems?.count ?? 0)")
             completion(todoItems)
         }
     }
@@ -52,14 +59,9 @@ class TodoViewModel {
     }
 
     func fetchTodosFromCoreData(completion: @escaping ([TodoItem]) -> Void) {
-        let request: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
         
-        do {
-            let todos = try context.fetch(request)
+        CoreDataStack.shared.fetchTodosFromCoreData { todos in
             completion(todos)
-        } catch {
-            print("Ошибка при загрузке задач из CoreData: \(error)")
-            completion([])
         }
     }
 
