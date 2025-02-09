@@ -199,7 +199,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					325BBFEC2D490D1A00A4C7A9 = {
 						CreatedOnToolsVersion = 16.2;
@@ -223,7 +223,7 @@
 			);
 			mainGroup = 325BBFE42D490D1A00A4C7A9;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 76;
 			productRefGroup = 325BBFEE2D490D1A00A4C7A9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
