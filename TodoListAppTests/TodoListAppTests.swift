@@ -49,9 +49,14 @@ final class TodoListAppTests: XCTestCase {
         XCTAssertEqual(viewModel.tasks.last?.todo, "Написать книгу")
     }
     func testDeleteTaskFromArray() {
+        let expectation = expectation(description: "Task should be deleted")
         viewModel.addItem(id: 1, todo: "Написать книгу", completed: false, userId: 1)
         if let task = viewModel.tasks.first {
+            viewModel.onTaskUpdated = {
+                expectation.fulfill()
+            }
             viewModel.deleteItem(task)
+            waitForExpectations(timeout: 2)
             XCTAssertEqual(viewModel.tasks.count, 0)
         } else {
             XCTFail("Task array is empty")
