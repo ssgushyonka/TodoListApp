@@ -202,14 +202,14 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					325BBFEC2D490D1A00A4C7A9 = {
-						CreatedOnToolsVersion = 16.2;
+						CreatedOnToolsVersion = 15.0;
 					};
 					325BC0052D490D1C00A4C7A9 = {
-						CreatedOnToolsVersion = 16.2;
+						CreatedOnToolsVersion = 15.0;
 						TestTargetID = 325BBFEC2D490D1A00A4C7A9;
 					};
 					325BC00F2D490D1C00A4C7A9 = {
-						CreatedOnToolsVersion = 16.2;
+						CreatedOnToolsVersion = 15.0;
 						TestTargetID = 325BBFEC2D490D1A00A4C7A9;
 					};
 				};
