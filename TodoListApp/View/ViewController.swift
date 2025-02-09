@@ -65,10 +65,6 @@ class ViewController: UIViewController {
         setupViews()
         setupConstraints()
         setupLoadingIndicator()
-        /*
-        activityIndicator.startAnimating()
-        loadingLabel.isHidden = false
-         */
     }
 
     private func setupBindings() {
@@ -228,6 +224,5 @@ extension ViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text else { return }
         viewModel.filteredTasks(with: searchText)
-        tableView.reloadData()
     }
 }
