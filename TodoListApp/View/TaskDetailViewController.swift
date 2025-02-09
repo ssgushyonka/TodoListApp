@@ -4,9 +4,11 @@ import UIKit
 class TaskDetailViewController: UIViewController {
     
     var taskText: String?
+    var descText: String?
     var task: TodoItem?
-    var onSave: ((String) -> Void)?
-
+    var onSave: ((String, String) -> Void)?
+    var viewModel: TodoViewModel?
+    
     private let taskTextView: UITextView = {
         let textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 34, weight: .bold)
@@ -16,7 +18,7 @@ class TaskDetailViewController: UIViewController {
         textView.isScrollEnabled = false
         textView.textContainer.lineBreakMode = .byWordWrapping
         textView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         return textView
     }()
     
@@ -39,7 +41,7 @@ class TaskDetailViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -57,16 +59,33 @@ class TaskDetailViewController: UIViewController {
         taskTextView.inputView = UIView()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(saveButtonTapped))
         taskTextView.sizeToFit()
+        setupBindings()
         setupViews()
         setupConstraints()
     }
-
+    
     //MARK: - set up views and constraints
     
     private func setupViews() {
         view.addSubview(taskTextView)
         view.addSubview(descTextView)
         view.addSubview(dateLabel)
+    }
+    private func setupBindings() {
+        viewModel?.onTaskUpdated = { [weak self] in
+            self?.updateUI()
+        }
+    }
+    private func updateUI() {
+        if let task = self.task {
+            taskTextView.text = task.todo
+            descTextView.text = task.desc
+            if let createdAt = task.createdAt {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yy/MM/dd"
+                dateLabel.text = dateFormatter.string(from: createdAt)
+            }
+        }
     }
     private func setupConstraints() {
         
@@ -90,11 +109,9 @@ class TaskDetailViewController: UIViewController {
         guard let updatedText = taskTextView.text, !updatedText.isEmpty else { return }
         guard let updatedDesc = descTextView.text else { return }
         if let task = task {
-            task.todo = updatedText
-            task.desc = updatedDesc
-            CoreDataStack.shared.saveContext(context: CoreDataStack.shared.viewContext)
+            viewModel?.updateItem(task, title: updatedText, completed: task.completed, createdAt: task.createdAt, desc: updatedDesc)
         }
-        onSave?(updatedText)
+        onSave?(updatedText, updatedDesc)
         navigationController?.popViewController(animated: true)
     }
 }

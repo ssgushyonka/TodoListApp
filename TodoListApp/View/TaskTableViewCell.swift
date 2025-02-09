@@ -43,6 +43,7 @@ class TaskTableViewCell: UITableViewCell {
         setupViews()
         setupConstraints()
         isContextMenuEnabled = true
+        
         let interaction = UIContextMenuInteraction(delegate: self)
         contentView.addInteraction(interaction)
     }
@@ -99,14 +100,10 @@ class TaskTableViewCell: UITableViewCell {
         taskLabel.attributedText = NSAttributedString(string: text, attributes: attributes)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd/MM/yy"
-        
         dateLabel.text = "\(dateFormatter.string(from: createdAt))"
+        
         descLabel.text = desc
-        if desc.isEmpty {
-                descLabel.isHidden = true
-        } else {
-            descLabel.isHidden = false
-        }
+        descLabel.isHidden = desc.isEmpty
         checkmarkButton.setAppearance(isDone: isCompleted)
         
         setNeedsLayout()
@@ -129,7 +126,7 @@ extension TaskTableViewCell: UIContextMenuInteractionDelegate {
             return previewVC
         }, actionProvider: { _ in
             
-            let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), handler: { _ in
+            let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive, handler: { _ in
                 self.onDelete?()
             })
             let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "square.and.pencil"), handler: { _ in

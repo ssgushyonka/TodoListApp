@@ -3,15 +3,24 @@ import UIKit
 import CoreData
 
 class TodoViewModel {
-    var tasks: [TodoItem] = []
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
+    private(set) var tasks: [TodoItem] = []
+    private(set) var filteredTasks: [TodoItem] = []
+    
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var onTaskUpdated: (() -> Void)?
+    var searchText: String = ""
+        
+    var isFiltering: Bool {
+        return !searchText.isEmpty
+    }
     func loadInitialDataIfNeeded(completion: @escaping () -> Void) {
         if UserDefaults.standard.bool(forKey: "DataLoaded") {
             fetchTodosFromCoreData { [weak self] todos in
                 guard let self = self else { return }
                 self.tasks = todos
                 completion()
+                self.onTaskUpdated?()
             }
         } else {
             fetchTodosFromAPI { [weak self] todoItems in
@@ -25,6 +34,7 @@ class TodoViewModel {
                 self.fetchTodosFromCoreData { todos in
                     self.tasks = todos
                     completion()
+                    self.onTaskUpdated?()
                 }
             }
         }
@@ -42,8 +52,14 @@ class TodoViewModel {
     }
 
     func fetchTodosFromCoreData(completion: @escaping ([TodoItem]) -> Void) {
-        CoreDataStack.shared.fetchTodosFromCoreData { todos in
+        let request: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
+        
+        do {
+            let todos = try context.fetch(request)
             completion(todos)
+        } catch {
+            print("Ошибка при загрузке задач из CoreData: \(error)")
+            completion([])
         }
     }
 
@@ -63,14 +79,23 @@ class TodoViewModel {
         todoItem.desc = String()
         tasks.append(todoItem)
         try? context.save()
+        onTaskUpdated?()
     }
 
     func deleteItem(_ todo: TodoItem) {
-        if let index = tasks.firstIndex(of: todo) {
-            tasks.remove(at: index)
+        let objectID = todo.objectID
+        context.perform { [weak self] in
+            guard let self = self else { return }
+            if let taskInContext = try? self.context.existingObject(with: objectID) {
+                self.context.delete(taskInContext)
+                try? self.context.save()
+                
+                if let index = self.tasks.firstIndex(where: { $0.objectID == objectID }) {
+                    self.tasks.remove(at: index)
+                }
+                self.onTaskUpdated?()
+            }
         }
-        context.delete(todo)
-        try? context.save()
     }
 
     func updateItem(_ todo: TodoItem, title: String, completed: Bool, createdAt: Date? = nil, desc: String? = nil) {
@@ -78,12 +103,34 @@ class TodoViewModel {
         todo.completed = completed
         todo.createdAt = createdAt
         todo.desc = desc ?? ""
-        try? context.save()
+        do {
+            try context.save()
+            onTaskUpdated?()
+        } catch {
+            print("Error saving context: \(error.localizedDescription)")
+        }
     }
 
     private func fetchTodoById(_ id: Int) -> TodoItem? {
         let request: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", id)
-        return try? context.fetch(request).first
+        let todoItem = try? context.fetch(request).first
+        onTaskUpdated?()
+        return todoItem
+    }
+
+    func filteredTasks(with searchText: String) {
+        if searchText.isEmpty {
+            filteredTasks = []
+        } else {
+            filteredTasks = tasks.filter { $0.todo?.localizedCaseInsensitiveContains(searchText) ?? false }
+        }
+        onTaskUpdated?()
+    }
+    func task(at index: Int) -> TodoItem {
+        return isFiltering ? filteredTasks[index] : tasks[index]
+    }
+    func taskCount() -> Int {
+        return isFiltering ? filteredTasks.count : tasks.count
     }
 }
