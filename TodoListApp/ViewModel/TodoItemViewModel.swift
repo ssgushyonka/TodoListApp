@@ -139,8 +139,9 @@ class TodoViewModel {
     }
 
     func filteredTasks(with searchText: String) {
+        self.searchText = searchText
         if searchText.isEmpty {
-            filteredTasks = []
+            filteredTasks = tasks
         } else {
             filteredTasks = tasks.filter { $0.todo?.localizedCaseInsensitiveContains(searchText) ?? false }
         }
