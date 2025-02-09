@@ -29,6 +29,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
         setupUI()
         setupBindings()
         activityIndicator.startAnimating()
@@ -108,8 +109,13 @@ class ViewController: UIViewController {
         editButton.tintColor = UIColor(red: 0xFE/255, green: 0xD7/255, blue: 0x02/255, alpha: 1)
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         toolbarItems = [flexibleSpace, UIBarButtonItem(customView: taskCountLabel), flexibleSpace, editButton]
-        navigationController?.toolbar.barTintColor = UIColor(red: 0x27/255.0, green: 0x27/255.0, blue: 0x29/255.0, alpha: 1.0)
-        navigationController?.toolbar.isTranslucent = false
+        if let toolbar = navigationController?.toolbar {
+            let appearance = UIToolbarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = UIColor(red: 0x27/255.0, green: 0x27/255.0, blue: 0x29/255.0, alpha: 1.0)
+            toolbar.standardAppearance = appearance
+            toolbar.scrollEdgeAppearance = appearance
+        }
         navigationController?.isToolbarHidden = false
     }
 
