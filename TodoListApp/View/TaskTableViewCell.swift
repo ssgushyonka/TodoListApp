@@ -1,6 +1,6 @@
 import UIKit
 
-class TaskTableViewCell: UITableViewCell {
+final class TaskTableViewCell: UITableViewCell {
 
     // MARK: - Properties
     static let Identifier = "TaskTableViewCell"

@@ -1,6 +1,6 @@
 import UIKit
 
-class CheckmarkButton: UIButton {
+final class CheckmarkButton: UIButton {
 
     private var isDone: Bool = false
 
