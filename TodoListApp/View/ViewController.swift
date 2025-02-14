@@ -42,6 +42,16 @@ final class ViewController: UIViewController {
         }
     }
 
+    // MARK: - Setup UI
+    private func setupBindings() {
+        viewModel.onTaskUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+                self?.updateTaskCount()
+            }
+        }
+    }
+
     private func setupUI() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
@@ -65,16 +75,6 @@ final class ViewController: UIViewController {
         setupViews()
         setupConstraints()
         setupLoadingIndicator()
-    }
-
-    // MARK: - Setup UI
-    private func setupBindings() {
-        viewModel.onTaskUpdated = { [weak self] in
-            DispatchQueue.main.async {
-                self?.tableView.reloadData()
-                self?.updateTaskCount()
-            }
-        }
     }
 
     private func setupLoadingIndicator() {
