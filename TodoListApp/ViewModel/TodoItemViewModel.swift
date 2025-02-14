@@ -2,22 +2,26 @@ import Foundation
 import UIKit
 import CoreData
 
-class TodoViewModel {
-    
+public final class TodoViewModel {
+
     private(set) var tasks: [TodoItem] = []
     private(set) var filteredTasks: [TodoItem] = []
-    
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
+    private let context: NSManagedObjectContext = {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("AppDelegate не найден!")
+        }
+        return appDelegate.persistentContainer.viewContext
+    }()
     var onTaskUpdated: (() -> Void)?
     var searchText: String = ""
-    
+
     var isFiltering: Bool {
         return !searchText.isEmpty
     }
     func loadInitialDataIfNeeded(completion: @escaping () -> Void) {
         fetchTodosFromCoreData { [weak self] todos in
             guard let self = self else { return }
-            
             if todos.isEmpty {
                 print("load from api")
                 self.fetchTodosFromAPI { todoItems in
@@ -42,7 +46,7 @@ class TodoViewModel {
                     }
                     self.saveTodoItemsToCoreData(todoItems)
                     UserDefaults.standard.set(true, forKey: "DataLoaded")
-                    
+
                     DispatchQueue.main.async {
                         completion()
                     }
@@ -57,7 +61,7 @@ class TodoViewModel {
             }
         }
     }
-    
+
     func fetchTodosFromAPI(completion: @escaping ([TodoItemModel]?) -> Void) {
         let apiService = APIService()
         apiService.fetchTodoItems { todoItems in
@@ -70,19 +74,26 @@ class TodoViewModel {
             }
         }
     }
-    
+
     func saveTodoItemsToCoreData(_ todos: [TodoItemModel]) {
         CoreDataStack.shared.saveTodoItemsToCoreData(todos)
     }
 
     func fetchTodosFromCoreData(completion: @escaping ([TodoItem]) -> Void) {
-        
+
         CoreDataStack.shared.fetchTodosFromCoreData { todos in
             completion(todos)
         }
     }
 
-    func addItem(id: Int, todo: String, completed: Bool, userId: Int, createdAt: Date? = nil, desc: String? = nil) {
+    func addItem(
+        id: Int,
+        todo: String,
+        completed: Bool,
+        userId: Int,
+        createdAt: Date? = nil,
+        desc: String? = nil
+    ) {
         guard !todo.isEmpty else {
             return
         }
@@ -108,7 +119,7 @@ class TodoViewModel {
             if let taskInContext = try? self.context.existingObject(with: objectID) {
                 self.context.delete(taskInContext)
                 try? self.context.save()
-                
+
                 if let index = self.tasks.firstIndex(where: { $0.objectID == objectID }) {
                     self.tasks.remove(at: index)
                 }
@@ -117,7 +128,13 @@ class TodoViewModel {
         }
     }
 
-    func updateItem(_ todo: TodoItem, title: String, completed: Bool, createdAt: Date? = nil, desc: String? = nil) {
+    func updateItem(
+        _ todo: TodoItem,
+        title: String,
+        completed: Bool,
+        createdAt: Date? = nil,
+        desc: String? = nil
+    ) {
         todo.todo = title
         todo.completed = completed
         todo.createdAt = createdAt

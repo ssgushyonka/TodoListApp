@@ -3,16 +3,16 @@ import Foundation
 
 class CoreDataStack {
     static let shared = CoreDataStack()
-    
+
     private init() {}
-    
+
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TodoListApp")
-        
+
         let description = container.persistentStoreDescriptions.first
         description?.shouldMigrateStoreAutomatically = true
         description?.shouldInferMappingModelAutomatically = true
-        
+
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("Unresolved error \(error), \(error.localizedDescription)")
@@ -20,17 +20,17 @@ class CoreDataStack {
         }
         return container
     }()
-    
+
     var viewContext: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
-    
+
     var backgroundContext: NSManagedObjectContext {
         let context = persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         return context
     }
-    
+
     func saveContext(context: NSManagedObjectContext) {
         if context.hasChanges {
             do {
@@ -40,7 +40,7 @@ class CoreDataStack {
             }
         }
     }
-    
+
     func taskExists(id: Int64, in context: NSManagedObjectContext) -> Bool {
         let fetchRequest: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %d", id)
@@ -52,7 +52,7 @@ class CoreDataStack {
             return false
         }
     }
-    
+
     func saveTodoItemsToCoreData(_ todoItems: [TodoItemModel]) {
         let context = CoreDataStack.shared.backgroundContext
         context.perform {

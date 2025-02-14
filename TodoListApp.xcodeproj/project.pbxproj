@@ -23,6 +23,7 @@
 		3200C0622D59263D0089162E /* TodoItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200C0612D59263D0089162E /* TodoItemViewModel.swift */; };
 		3200C0882D592BB70089162E /* TodoListAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200C0872D592BB70089162E /* TodoListAppUITests.swift */; };
 		3200C0952D592BCB0089162E /* TodoListAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200C0942D592BCB0089162E /* TodoListAppTests.swift */; };
+		3244B6732D5FD8AB0016FF2C /* ColorsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3244B6722D5FD8A20016FF2C /* ColorsExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,7 @@
 		3200C0872D592BB70089162E /* TodoListAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListAppUITests.swift; sourceTree = "<group>"; };
 		3200C0922D592BCB0089162E /* TodoListAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoListAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3200C0942D592BCB0089162E /* TodoListAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListAppTests.swift; sourceTree = "<group>"; };
+		3244B6722D5FD8A20016FF2C /* ColorsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorsExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 		3200C0332D5923510089162E /* TodoListApp */ = {
 			isa = PBXGroup;
 			children = (
+				3244B6712D5FD8960016FF2C /* Extensions */,
 				3200C0552D5925560089162E /* Services */,
 				3200C04E2D5924200089162E /* ViewModel */,
 				3200C04D2D59241A0089162E /* View */,
@@ -196,6 +199,14 @@
 			path = TodoListAppTests;
 			sourceTree = "<group>";
 		};
+		3244B6712D5FD8960016FF2C /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				3244B6722D5FD8A20016FF2C /* ColorsExtension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -210,6 +221,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3244B6702D5FD3AC0016FF2C /* PBXTargetDependency */,
 			);
 			name = TodoListApp;
 			productName = TodoListApp;
@@ -284,6 +296,9 @@
 				Base,
 			);
 			mainGroup = 3200C0282D5923510089162E;
+			packageReferences = (
+				3244B66E2D5FD3930016FF2C /* XCRemoteSwiftPackageReference "SwiftLint" */,
+			);
 			productRefGroup = 3200C0322D5923510089162E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -328,6 +343,7 @@
 				3200C0542D59253B0089162E /* TodoItemModel.swift in Sources */,
 				3200C0392D5923510089162E /* ViewController.swift in Sources */,
 				3200C05B2D5925CD0089162E /* TaskTableViewCell.swift in Sources */,
+				3244B6732D5FD8AB0016FF2C /* ColorsExtension.swift in Sources */,
 				3200C0352D5923510089162E /* AppDelegate.swift in Sources */,
 				3200C0592D5925890089162E /* CoreDataStack.swift in Sources */,
 				3200C0602D59260B0089162E /* CheckmarkButton.swift in Sources */,
@@ -369,6 +385,10 @@
 			isa = PBXTargetDependency;
 			target = 3200C0302D5923510089162E /* TodoListApp */;
 			targetProxy = 3200C0962D592BCB0089162E /* PBXContainerItemProxy */;
+		};
+		3244B6702D5FD3AC0016FF2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 3244B66F2D5FD3AC0016FF2C /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -658,6 +678,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3244B66E2D5FD3930016FF2C /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = exactVersion;
+				version = 0.58.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3244B66F2D5FD3AC0016FF2C /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3244B66E2D5FD3930016FF2C /* XCRemoteSwiftPackageReference "SwiftLint" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		3200C03D2D5923510089162E /* TodoListApp.xcdatamodeld */ = {

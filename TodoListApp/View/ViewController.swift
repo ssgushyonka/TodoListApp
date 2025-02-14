@@ -2,13 +2,22 @@ import Foundation
 import CoreData
 import UIKit
 
-class ViewController: UIViewController {
-    // For loading view
+final class ViewController: UIViewController {
+
+    // MARK: - Properties
     private let activityIndicator = UIActivityIndicatorView(style: .large)
     private let loadingLabel = UILabel()
-    let searchController = UISearchController(searchResultsController: nil)
-
+    private let searchController = UISearchController(searchResultsController: nil)
     private var viewModel: TodoViewModel
+
+    // MARK: - UI Components
+    var taskCountLabel: UILabel?
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.Identifier)
+        return tableView
+    }()
 
     init(viewModel: TodoViewModel) {
         self.viewModel = viewModel
@@ -18,15 +27,7 @@ class ViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    var taskCountLabel: UILabel?
-    private let tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(TaskTableViewCell.self, forCellReuseIdentifier: TaskTableViewCell.Identifier)
-        return tableView
-    }()
-
+    // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -44,15 +45,13 @@ class ViewController: UIViewController {
     private func setupUI() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
-        navigationController?.navigationBar.tintColor = UIColor(red: 0xFE / 255, green: 0xD7 / 255, blue: 0x02 / 255, alpha: 1)
+        navigationController?.navigationBar.tintColor = ColorsExtension.grayToolBar
         title = "Задачи"
 
         let backButton = UIBarButtonItem()
         backButton.title = "Назад"
         navigationItem.backBarButtonItem = backButton
         navigationController?.isToolbarHidden = false
-
-        // Setup searchController
         navigationItem.searchController = searchController
         if let microphoneImage = UIImage(systemName: "mic.fill") {
             searchController.searchBar.showsBookmarkButton = true
@@ -68,6 +67,7 @@ class ViewController: UIViewController {
         setupLoadingIndicator()
     }
 
+    // MARK: - Setup UI
     private func setupBindings() {
         viewModel.onTaskUpdated = { [weak self] in
             DispatchQueue.main.async {
@@ -75,6 +75,18 @@ class ViewController: UIViewController {
                 self?.updateTaskCount()
             }
         }
+    }
+
+    private func setupLoadingIndicator() {
+        activityIndicator.color = .gray
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
+        loadingLabel.text = "Загрузка..."
+        loadingLabel.textAlignment = .center
+        loadingLabel.textColor = .gray
+        loadingLabel.frame = CGRect(x: 0, y: activityIndicator.frame.maxY + 8, width: view.bounds.width, height: 30)
+        view.addSubview(activityIndicator)
+        view.addSubview(loadingLabel)
     }
 
     private func setupViews() {
@@ -90,7 +102,7 @@ class ViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 
@@ -106,13 +118,13 @@ class ViewController: UIViewController {
             target: self,
             action: #selector(editButtonTapped)
         )
-        editButton.tintColor = UIColor(red: 0xFE/255, green: 0xD7/255, blue: 0x02/255, alpha: 1)
+        editButton.tintColor = ColorsExtension.yellowButton
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         toolbarItems = [flexibleSpace, UIBarButtonItem(customView: taskCountLabel), flexibleSpace, editButton]
         if let toolbar = navigationController?.toolbar {
             let appearance = UIToolbarAppearance()
             appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = UIColor(red: 0x27/255.0, green: 0x27/255.0, blue: 0x29/255.0, alpha: 1.0)
+            appearance.backgroundColor = ColorsExtension.toolBarAppearance
             toolbar.standardAppearance = appearance
             toolbar.scrollEdgeAppearance = appearance
         }
@@ -125,16 +137,27 @@ class ViewController: UIViewController {
             taskCountLabel.sizeToFit()
     }
 
-    @objc private func editButtonTapped() {
-        let alertController = UIAlertController(title: "Новая задача", message: "Введите задачу", preferredStyle: .alert)
+    @objc
+    private func editButtonTapped() {
+        let alertController = UIAlertController(
+            title: "Новая задача",
+            message: "Введите задачу",
+            preferredStyle: .alert
+        )
         alertController.addTextField { textField in
             textField.placeholder = "Задача"
         }
 
         let addAction = UIAlertAction(title: "Добавить", style: .default) { [weak self] _ in
             guard let self = self else { return }
-            if let textField = alertController.textFields?.first, let todoText = textField.text, !todoText.isEmpty {
-                self.viewModel.addItem(id: Int.random(in: 0..<1000), todo: todoText, completed: false, userId: 1)
+            if let textField = alertController.textFields?.first,
+               let todoText = textField.text,
+               !todoText.isEmpty {
+                self.viewModel.addItem(
+                    id: Int.random(in: 0..<1000),
+                    todo: todoText,
+                    completed: false, userId: 1
+                )
             }
         }
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
@@ -151,31 +174,19 @@ class ViewController: UIViewController {
         taskDetailVC.descText = task.desc
 
         taskDetailVC.onSave = { [weak self] updatedText, updatedDesc in
-                guard let self = self else { return }
-                self.viewModel.updateItem(
-                    task,
-                    title: updatedText,
-                    completed: task.completed,
-                    createdAt: task.createdAt,
-                    desc: updatedDesc
-                )
-            self.tableView.reloadData()
+            guard let self = self else { return }
+            self.viewModel.updateItem(
+                task,
+                title: updatedText,
+                completed: task.completed,
+                createdAt: task.createdAt,
+                desc: updatedDesc
+            )
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
             }
-
+        }
         navigationController?.pushViewController(taskDetailVC, animated: true)
-    }
-
-    private func setupLoadingIndicator() {
-        activityIndicator.color = .gray
-        activityIndicator.center = view.center
-        activityIndicator.hidesWhenStopped = true
-        loadingLabel.text = "Загрузка..."
-        loadingLabel.textAlignment = .center
-        loadingLabel.textColor = .gray
-        loadingLabel.frame = CGRect(x: 0, y: activityIndicator.frame.maxY + 8, width: view.bounds.width, height: 30)
-
-        view.addSubview(activityIndicator)
-        view.addSubview(loadingLabel)
     }
 }
 
@@ -186,17 +197,30 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TaskTableViewCell.Identifier, for: indexPath) as? TaskTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: TaskTableViewCell.Identifier,
+            for: indexPath
+        ) as? TaskTableViewCell else {
             return UITableViewCell()
         }
 
         let task = viewModel.task(at: indexPath.row)
         let createdAt = task.createdAt ?? Date()
 
-        cell.configure(with: task.todo ?? "", isCompleted: task.completed, createdAt: createdAt, desc: task.desc ?? "")
+        cell.configure(
+            with: task.todo ?? "",
+            isCompleted: task.completed,
+            createdAt: createdAt,
+            desc: task.desc ?? ""
+        )
         cell.toggleCompletion = { [weak self] in
             guard let self = self else { return }
-            self.viewModel.updateItem(task, title: task.todo ?? "", completed: !task.completed, createdAt: createdAt, desc: task.desc ?? "" )
+            self.viewModel.updateItem(
+                task, title: task.todo ?? "",
+                completed: !task.completed,
+                createdAt: createdAt,
+                desc: task.desc ?? ""
+            )
         }
 
         cell.onDelete = { [weak self] in

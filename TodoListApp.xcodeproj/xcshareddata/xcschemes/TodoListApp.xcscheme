@@ -15,7 +15,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "325BBFEC2D490D1A00A4C7A9"
+               BlueprintIdentifier = "3200C0302D5923510089162E"
                BuildableName = "TodoListApp.app"
                BlueprintName = "TodoListApp"
                ReferencedContainer = "container:TodoListApp.xcodeproj">
@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "325BC0052D490D1C00A4C7A9"
+               BlueprintIdentifier = "3200C0912D592BCB0089162E"
                BuildableName = "TodoListAppTests.xctest"
                BlueprintName = "TodoListAppTests"
                ReferencedContainer = "container:TodoListApp.xcodeproj">
@@ -46,7 +46,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "325BC00F2D490D1C00A4C7A9"
+               BlueprintIdentifier = "3200C0842D592BB70089162E"
                BuildableName = "TodoListAppUITests.xctest"
                BlueprintName = "TodoListAppUITests"
                ReferencedContainer = "container:TodoListApp.xcodeproj">
@@ -68,7 +68,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "325BBFEC2D490D1A00A4C7A9"
+            BlueprintIdentifier = "3200C0302D5923510089162E"
             BuildableName = "TodoListApp.app"
             BlueprintName = "TodoListApp"
             ReferencedContainer = "container:TodoListApp.xcodeproj">
@@ -95,7 +95,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "325BBFEC2D490D1A00A4C7A9"
+            BlueprintIdentifier = "3200C0302D5923510089162E"
             BuildableName = "TodoListApp.app"
             BlueprintName = "TodoListApp"
             ReferencedContainer = "container:TodoListApp.xcodeproj">

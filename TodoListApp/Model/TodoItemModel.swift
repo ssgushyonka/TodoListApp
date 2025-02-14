@@ -23,11 +23,18 @@ extension TodoItemModel {
         todoItem.userId = Int64(self.userId)
         todoItem.createdAt = self.createdAt ?? Date()
         todoItem.desc = self.desc ?? ""
-        
+
         return todoItem
     }
-    
+
     static func fromCoreDataModel(_ coreDataModel: TodoItem) -> TodoItemModel {
-        return TodoItemModel(id: Int(coreDataModel.id), todo: coreDataModel.todo ?? "", completed: coreDataModel.completed, userId: Int(coreDataModel.userId), createdAt: coreDataModel.createdAt ?? Date(), desc: coreDataModel.desc ?? "")
+        return TodoItemModel(
+            id: Int(coreDataModel.id),
+            todo: coreDataModel.todo ?? "",
+            completed: coreDataModel.completed,
+            userId: Int(coreDataModel.userId),
+            createdAt: coreDataModel.createdAt ?? Date(),
+            desc: coreDataModel.desc ?? ""
+        )
     }
 }
