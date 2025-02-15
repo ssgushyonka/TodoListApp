@@ -44,7 +44,7 @@ final class TaskDetailViewController: UIViewController {
         return label
     }()
 
-    // MARK: - Lifecycle
+    // MARK: - Overrige funcs
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -113,6 +113,7 @@ final class TaskDetailViewController: UIViewController {
         }
     }
 
+    // MARK: - Action funcs
     @objc
     private func saveButtonTapped() {
         guard let updatedText = taskTextView.text, !updatedText.isEmpty else { return }

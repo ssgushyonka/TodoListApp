@@ -131,12 +131,7 @@ final class ViewController: UIViewController {
         navigationController?.isToolbarHidden = false
     }
 
-    private func updateTaskCount() {
-        guard let taskCountLabel = self.taskCountLabel else { return }
-            taskCountLabel.text = "\(viewModel.taskCount()) Задач"
-            taskCountLabel.sizeToFit()
-    }
-
+    // MARK: - Action funcs
     @objc
     private func editButtonTapped() {
         let alertController = UIAlertController(
@@ -164,6 +159,13 @@ final class ViewController: UIViewController {
         alertController.addAction(addAction)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+
+    // MARK: - Private funcs
+    private func updateTaskCount() {
+        guard let taskCountLabel = self.taskCountLabel else { return }
+            taskCountLabel.text = "\(viewModel.taskCount()) Задач"
+            taskCountLabel.sizeToFit()
     }
 
     private func editTask(at indexPath: IndexPath) {

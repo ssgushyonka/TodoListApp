@@ -1,10 +1,8 @@
 import CoreData
 import Foundation
 
-class CoreDataStack {
-    static let shared = CoreDataStack()
-
-    private init() {}
+final class CoreDataStack {
+    init() {}
 
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TodoListApp")
@@ -54,7 +52,7 @@ class CoreDataStack {
     }
 
     func saveTodoItemsToCoreData(_ todoItems: [TodoItemModel]) {
-        let context = CoreDataStack.shared.backgroundContext
+        let context = backgroundContext
         context.perform {
             for todoItem in todoItems {
                 if !self.taskExists(id: Int64(todoItem.id), in: context) {
@@ -68,12 +66,13 @@ class CoreDataStack {
                 }
             }
             if context.hasChanges {
-                CoreDataStack.shared.saveContext(context: context)
+                self.saveContext(context: context)
             }
         }
     }
+
     func fetchTodosFromCoreData(completion: @escaping ([TodoItem]) -> Void) {
-        let context = CoreDataStack.shared.viewContext
+        let context = viewContext
         let fetchRequest: NSFetchRequest<TodoItem> = TodoItem.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
         context.perform {

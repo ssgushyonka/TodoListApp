@@ -40,6 +40,7 @@ final class TaskTableViewCell: UITableViewCell {
         return label
     }()
 
+    //MARK: - Overrige funcs
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
@@ -114,13 +115,14 @@ final class TaskTableViewCell: UITableViewCell {
         layoutIfNeeded()
     }
 
+    // MARK: - Action funcs
     @objc
     private func didTapCheckmark() {
         toggleCompletion?()
     }
 }
 
-// for task preview
+// Task context menu
 extension TaskTableViewCell: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(
         _ interaction: UIContextMenuInteraction,
