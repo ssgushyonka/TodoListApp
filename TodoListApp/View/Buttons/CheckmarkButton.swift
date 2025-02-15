@@ -1,9 +1,10 @@
 import UIKit
 
 final class CheckmarkButton: UIButton {
-
+    // MARK: - Properties
     private var isDone: Bool = false
 
+    // MARK: - Override funcs
     override init(frame: CGRect) {
         super.init(frame: frame)
         addTarget(self, action: #selector(toggleState), for: .touchUpInside)
@@ -13,14 +14,9 @@ final class CheckmarkButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Setup UI
     func setAppearance(isDone: Bool) {
         self.isDone = isDone
-        updateImage()
-    }
-
-    @objc
-    private func toggleState() {
-        isDone.toggle()
         updateImage()
     }
 
@@ -41,5 +37,12 @@ final class CheckmarkButton: UIButton {
             )
 
         setImage(isDone ? doneImage : undoneImage, for: .normal)
+    }
+
+    // MARK: - Action funcs
+    @objc
+    private func toggleState() {
+        isDone.toggle()
+        updateImage()
     }
 }
